@@ -1,0 +1,28 @@
+---
+
+- hosts: raspberry_pi
+  become: yes
+  become_user: root
+  gather_facts: no
+  name: Install some packages and print  a list
+
+
+  tasks:
+
+    - name: Install packages with loop
+      apt:
+        name:
+          - git
+          - htop
+        state: present
+        update_cache: yes
+
+
+    - name: Print a list of names
+      debug:
+        msg: "Hello, {{ item }}"
+      with_items:
+        - John
+        - Jane
+        - Alex
+        - Sarah
