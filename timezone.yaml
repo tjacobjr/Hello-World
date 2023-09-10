@@ -1,0 +1,46 @@
+---
+- hosts: webservers
+  become: yes
+  become_user: root
+  gather_facts: no
+
+  vars_prompt:
+
+    - name: user_timezone
+      prompt: Enter new timezone
+      private: no
+
+
+  pre_tasks:
+
+    - name: check length
+      assert:
+        that: user_timezone | length > 2
+
+
+  tasks:
+
+    - name: Get Timezone
+      ansible.builtin.shell: cat /etc/timezone
+      register: ret_timezone
+
+
+    - name: Update timezone
+      shell: "echo {{user_timezone}} > /etc/timezone"
+      when: ret_timezone.stdout != user_timezone
+      notify:
+        - print_update
+
+
+    - name: print not updated
+      debug:
+        msg: "Timezone is the same!"
+      when: ret_timezone.stdout == user_timezone
+
+
+
+  handlers:
+
+    - name: print_update
+      debug:
+        msg: "Timezone has been updated"
